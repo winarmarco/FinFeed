@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  followingIds   String[] @db.ObjectId
+  following      User[]   @relation("UserFollow", fields: [followingIds], references: [id])
+  totalFollowing Int      @default(0)
+
+  followersIds   String[] @db.ObjectId
+  followers      User[]   @relation("UserFollow", fields: [followersIds], references: [id])
+  totalFollowers Int      @default(0)
+  
+  postsIds       String[] @db.ObjectId
+  posts          Post[]
+
+  savedPostIds   String[] @db.ObjectId
+  savedPost      Post[]   @relation("SavedPosts", fields: [savedPostIds], references: [id])
+  
+  userId         String
+}
+
+model Post {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId   String   @db.ObjectId
+  author     User     @relation(fields: [authorId], references: [id])
+  
+  savedByIds String[] @db.ObjectId
+  savedBy    User[]   @relation("SavedPosts", fields: [savedByIds], references: [id])
+}

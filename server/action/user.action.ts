@@ -3,6 +3,9 @@ import { User } from "../model/user.model";
 import { connectToDB } from "../../lib/mongoose"
 
 
+
+
+
 interface CreateUserProps {
   userId: String,
 }
@@ -10,12 +13,14 @@ interface CreateUserProps {
 export const createUser = async ({
   userId
 }: CreateUserProps) => {
-  await connectToDB();
+  // await connectToDB();
 
-  const user = new User({userId});
 
   try {
-    return await user.save();
+    
+
+    const newUser = await prisma
+
   } catch (error) {
     throw Error(`Failed Creating User: ${error}`);
   }
