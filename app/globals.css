@@ -1,6 +1,65 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.tiptap {
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  a {
+    color: #68cef8;
+    text-decoration: underline;
+  }
+
+  ul,
+  ol {
+    padding: 0 1rem;
+  }
+
+  ol {
+    list-style: decimal;
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  code {
+    background-color: rgba(#616161, 0.1);
+    border-radius: 0.25em;
+    box-decoration-break: clone;
+    color: #616161;
+    font-size: 0.9rem;
+    padding: 0.25em;
+  }
+
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+  
+  h3 {
+    @apply text-lg;
+  }
+  
+  h4 {
+    @apply text-base;
+  }
+  
+  h5 {
+    @apply text-sm;
+  }
+  
+  h6 {
+    @apply text-xs;
+  }
+
+}
  
 @layer base {
   :root {
@@ -74,3 +133,4 @@
     @apply bg-background text-foreground;
   }
 }
+

@@ -10,7 +10,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({icon, label, link}) => {
   return (
     <Link
       href={link}
-      className="flex flex-row gap-x-2 py-4 items-center justify-center md:justify-start px-0 md:px-2 group relative hover:bg-slate-100 aspect-square md:aspect-auto transition-bg rounded" 
+      className="flex flex-row gap-x-2 py-4 my-2 items-center justify-center md:justify-start px-0 md:px-2 group relative hover:bg-slate-100 aspect-square md:aspect-auto transition-bg rounded md:w-full" 
     >
       <div className="w-8 h-8 flex items-center justify-center">{icon}</div>
       <p className="hidden md:block">{label}</p>
