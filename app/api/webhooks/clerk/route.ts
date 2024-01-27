@@ -59,10 +59,17 @@ async function handler(req: Request) {
   if (eventType === "user.created") {
     if (!id) throw new Error("User id is missing");
 
-    await createUser({userId: id});
+    
+    try {
+      const user = await createUser({userId: id});
+      return new Response('success', {status: 200});
+    } catch (error: any) {
+      console.error(error);
+      throw new Response(`${error.code}: ${error.message}`, { status: 500 });
+    }
   }
  
-  return new Response('', { status: 200 })
+  return new Response('', {status: 200});
 }
 
 
