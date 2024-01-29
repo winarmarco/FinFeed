@@ -1,17 +1,20 @@
 'use client';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { httpBatchLink, getFetch, loggerLink } from '@trpc/client';
+import { httpBatchLink, getFetch, loggerLink, createWSClient, wsLink } from '@trpc/client';
 import { useState } from 'react';
 import superjson from 'superjson';
 import { trpc } from './client';
 import queryClient from './query-client';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { AppRouter } from '@/server';
+
 
 
 export const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  
   const url = process.env.NEXT_PUBLIC_VERCEL_URL
     ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
     : 'http://localhost:3000/api/trpc/';

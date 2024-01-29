@@ -1,5 +1,5 @@
 import { User } from "lucide-react";
-import CallCard from "./call-card";
+import CallCard from "./trade-suggestion-card";
 
 
 const FeedCard = () => {

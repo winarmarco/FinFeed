@@ -1,10 +1,10 @@
+import { mergeRouters } from "./trpc";
 import { publicProcedure, router } from "./trpc";
+import { service } from "./service";
 
-export const appRouter = router({
-  getTodos: publicProcedure.query(async () => {
-    return [10, 20, 30];
-  })
-})
+const servicesRouter = router({
+  services: service,
+});
 
-
+export const appRouter = mergeRouters(servicesRouter);
 export type AppRouter = typeof appRouter;

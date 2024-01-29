@@ -7,13 +7,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-interface CallCardProps {
+interface TradeSuggestionCardProps {
   symbol: string,
   initialPrice: number,
   predictionPrice: number,
 }
 
-const CallCard: React.FC<CallCardProps> = ({
+const TradeSuggestionCard: React.FC<TradeSuggestionCardProps> = ({
   symbol,
   initialPrice,
   predictionPrice,
@@ -66,4 +66,4 @@ const CallCard: React.FC<CallCardProps> = ({
   );
 };
 
-export default CallCard;
+export default TradeSuggestionCard;

@@ -34,6 +34,10 @@ const HeadingSelection: React.FC<HeadingSelectionProps> = ({editor}) => {
           if (level < 1 || level > 6) return;
           type Level = 1 | 2 | 3 | 4 | 5 | 6;
 
+          // if it's a level 4, then set to default text
+          if (level === 4) return editor.chain().focus().setParagraph().run()
+          
+          // for others set to heading
           editor
             .chain()
             .focus()
