@@ -1,3 +1,4 @@
+import { quoteInfoSchema, quotePriceSchema } from "@/server/model/quote.model";
 import { publicProcedure, router } from "@/server/trpc";
 import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
@@ -12,13 +13,19 @@ export const searchWithKey = publicProcedure
 
     const { searchKey } = input;
 
+    if (!searchKey) return [];
+
     const result = await yahooFinance.search(searchKey);
 
     const { quotes } = result;
 
     if (!quotes) throw new Error("Not found");
 
-    const filteredQuotes = quotes.filter((quote) => quote.isYahooFinance);
+    const filteredQuotes = quotes
+      .filter((quote) => quote.isYahooFinance)
+      .map((quote) => {
+        return quoteInfoSchema.parse(quote);
+      });
 
     return filteredQuotes;
   });
@@ -35,7 +42,10 @@ export const getQuote = publicProcedure
     if (!result)
       throw new TRPCError({ message: "Quote not found", code: "NOT_FOUND" });
 
-    return result;
+    result["price"] = result.regularMarketPrice;
+    result["percentChange"] = result.regularMarketChangePercent;
+
+    return quotePriceSchema.parse(result);
   });
 
 const financeRouter = router({

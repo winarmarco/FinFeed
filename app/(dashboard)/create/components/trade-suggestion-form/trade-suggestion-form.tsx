@@ -3,121 +3,57 @@
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import AssetLookup from "./trade-suggestion-form-item/asset-lookup";
-import { trpc } from "@/_trpc/client";
-import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { InputWithIcon } from "@/components/ui/input-with-icon";
-import * as z from "zod";
 import { cn } from "@/lib/utils";
+import { ITradeSuggestion } from "../../page";
 
-export interface Quote {
-  symbol: string;
-  currentPrice: number;
-  change: number;
-  currency: string;
-  shortName: string;
-  longName: string;
-}
+const TradeSuggestionForm: React.FC<{
+  onChange: (tradeSuggestion: ITradeSuggestion) => void;
+  value: ITradeSuggestion;
+}> = ({ onChange, value }) => {
 
-export interface TradeSuggestion {
-  quote: Quote;
-  predictionPrice?: number;
-}
+  const calculatePotentialPnL = (suggestion?: ITradeSuggestion) => {
+    if (!suggestion || !suggestion.quote) return null;
 
-const TradeSuggestionForm: React.FC = () => {
-  const [suggestion, setSuggestion] = useState<TradeSuggestion>();
+    const {predictionPrice} = suggestion;
+    const {price: currentPrice} = suggestion.quote;
 
-  // const { data, mutate } = trpc.services.finance.getQuote.useMutation({
-  //   onSuccess: (data) => {
 
-  //     setSuggestion({
-  //       symbol: data.symbol,
-  //       shortName: data.shortName || "",
-  //       initialPrice: data.regularMarketPrice,
-  //       change: data.regularMarketChangePercent,
-  //       currency: data.currency || "$",
-  //     });
-  //   },
-  // });
-
-  // const { symbol, predictionPrice, initialPrice, currency } = suggestion;
-
-  // const currentPrice = (initialPrice + predictionPrice) / 3;
-
-  // const pnlFromInit = parseFloat(String((predictionPrice - initialPrice) / initialPrice * 100)).toFixed(2);
-  // const currentPnl = parseFloat(String((currentPrice - initialPrice) / initialPrice * 100)).toFixed(2);
-
-  // useEffect(() => {
-  //   const websocket = new WebSocket('wss://streamer.finance.yahoo.com/')
-  //   websocket.onopen = () => {
-  //     console.log('connected');
-  //     websocket.send(JSON.stringify({
-  //       subscribe: ["BTC-USD"]
-  //     }))
-  //   }
-
-  //   websocket.onerror = (event) => {
-  //     console.log(event);
-  //   }
-
-  //   websocket.onclose = () => {
-  //     console.log("CLOSED");
-  //   }
-
-  //   websocket.onmessage = (event) => {
-  //     console.log("coming message");
-  //     console.log(event);
-  //   }
-
-  // }, []);
-
-  const onSelect = (quote: Quote) => {
-    setSuggestion((prevVal) => ({ ...prevVal, quote }));
+    return (predictionPrice - currentPrice) / currentPrice;
+    
   };
 
-  const potentialPnL =
-    suggestion && suggestion.predictionPrice
-      ? (suggestion.predictionPrice - suggestion.quote.currentPrice) /
-        suggestion.quote.currentPrice
-      : 0;
-
-  console.log(suggestion);
+  const potentialPnL = calculatePotentialPnL(value);
 
   return (
-    <Card className="w-full flex flex-col px-4 py-4">
+    <Card className="w-full flex flex-col px-4 py-4 mb-2">
       <CardHeader className="p-0 border-b-2 py-2">
         <span className="font-bold">Prediction</span>
         <CardTitle>
-          <AssetLookup onSelectQuote={onSelect} />
+          <AssetLookup onChange={onChange} suggestion={value} />
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="py-2">
           <div className="">
-            <Label>Target price</Label>
             <InputWithIcon
-              disabled={!suggestion}
+              disabled={!value.quote}
               type="number"
+              placeholder="Target Price"
               className="w-full"
-              value={suggestion?.predictionPrice}
+              value={value.predictionPrice?.toString() || ""}
               onChange={(e) => {
-                setSuggestion((prevVal) => {
-                  if (!prevVal) return undefined;
-
-                  return {
-                    ...prevVal,
-                    predictionPrice: parseInt(e.target.value),
-                  };
+                const inputValue = e.target.value;
+                onChange({
+                  ...value,
+                  predictionPrice:  parseFloat(inputValue || "0")
                 });
               }}
-              icon={suggestion?.quote.currency || ""}
+              icon={value.quote?.currency || ""}
             />
           </div>
         </div>

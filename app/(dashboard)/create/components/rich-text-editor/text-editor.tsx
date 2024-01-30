@@ -1,6 +1,6 @@
 "use client";
 
-import {EditorContent, useEditor} from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -8,25 +8,17 @@ import List from "@tiptap/extension-list-item";
 import Heading from "@tiptap/extension-heading";
 import Toolbar from "./toolbar/toolbar";
 import StarterKit from "@tiptap/starter-kit";
-import {ControllerRenderProps} from "react-hook-form";
+import { ControllerRenderProps } from "react-hook-form";
+import { editorExtension } from "@/lib/constants";
 
 interface TextEditorProps {
   onChange: (richText: string) => void;
 }
 
-const TextEditor: React.FC<TextEditorProps> = ({onChange}) => {
+
+const TextEditor: React.FC<TextEditorProps> = ({ onChange }) => {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      Link.configure({
-        openOnClick: true,
-        autolink: true,
-      }),
-      Image,
-      List,
-      Heading,
-    ],    
+    extensions: editorExtension,
     editorProps: {
       attributes: {
         class:
@@ -34,9 +26,9 @@ const TextEditor: React.FC<TextEditorProps> = ({onChange}) => {
       },
     },
     content: "<p>HeloWorld</p>",
-    onUpdate: ({editor}) => {  
-      onChange(editor.getHTML())
-    }
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
   });
 
   return (

@@ -1,14 +1,13 @@
 "use client";
 
-import * as React from "react";
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { useDebounce, useDebouncedCallback } from "use-debounce";
+import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -19,10 +18,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { z } from "zod";
 import { trpc } from "@/_trpc/client";
-import queryClient from "@/_trpc/query-client";
-import { Quote, TradeSuggestion } from "../trade-suggestion-form";
+import { useLivePrice } from "@/lib/context/useLivePrice";
+import { TickerLivePrice } from "@/lib/context/LivePriceContextProvider";
+import AssetDisplay from "./asset-display";
+import { Input } from "@/components/ui/input";
+import { InputWithIcon } from "@/components/ui/input-with-icon";
+import { ITradeSuggestion } from "../../../page";
 
 interface IOption {
   symbol: string;
@@ -33,85 +35,92 @@ interface IOption {
 }
 
 interface AssetLookupProps {
-  // suggestion: TradeSuggestion | undefined;
-  onSelectQuote: (symbol: Quote) => void;
+  suggestion: ITradeSuggestion;
+  onChange: (tradeSuggestion: ITradeSuggestion) => void;
 }
 
-const AssetLookup: React.FC<AssetLookupProps> = ({onSelectQuote}) => {
+const initState = [
+  {
+    shortName: "",
+    longName: "",
+    symbol: "CL=F",
+    typeDisp: "Futures",
+    exchange: "NYM",
+  },
+
+  {
+    shortName: "",
+    longName: "",
+    symbol: "C",
+    typeDisp: "Equity",
+    exchange: "NYQ",
+  },
+
+  {
+    shortName: "",
+    longName: "",
+    symbol: "BZ=F",
+    typeDisp: "Futures",
+    exchange: "NYM",
+  },
+
+  {
+    shortName: "",
+    longName: "",
+    symbol: "HG=F",
+    typeDisp: "Futures",
+    exchange: "CMX",
+  },
+
+  {
+    shortName: "",
+    longName: "",
+    symbol: "KC=F",
+    typeDisp: "Futures",
+    exchange: "NYB",
+  },
+];
+
+const AssetLookup: React.FC<AssetLookupProps> = ({
+  suggestion,
+  onChange,
+
+}) => {
   const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [options, setOptions] = useState<IOption[]>([]);
-  const [selectedQuote, setSelectedQuote] = useState<Quote>();
+  const [options, setOptions] = useState<IOption[]>(initState);
+  const debounced = useDebouncedCallback((value: string) => {
+    getOptions.mutate({ searchKey: value || "" });
+  }, 500);
 
   const getOptions = trpc.services.finance.searchWithKey.useMutation({
     onSuccess: (data) => {
-      const searchResults = data;
-
-      if (!searchResults) return;
-
-      setOptions(
-        searchResults.map((result) => {
-          const {
-            shortName = "",
-            longName = "",
-            symbol,
-            typeDisp,
-            exchange,
-          } = result;
-          return {
-            shortName,
-            longName,
-            symbol,
-            typeDisp,
-            exchange,
-          };
-        })
-      );
+      setOptions(data);
     },
   });
-
-  const { mutate } = getOptions;
 
   const getQuote = trpc.services.finance.getQuote.useMutation({
     onSuccess: (data) => {
-      const {
-        symbol,
-        shortName = "",
-        longName = "",
-        currency = "",
-        regularMarketPrice = 0,
-        regularMarketChangePercent = 0,
-      } = data;
-
-      const quote = {        symbol,
-        shortName,
-        longName,
-        currency,
-        currentPrice: regularMarketPrice,
-        change: regularMarketChangePercent,}
-
-      setSelectedQuote(quote);
-      onSelectQuote(quote)
+      onChange(({ ...suggestion, quote: data }));
+      setSubscribedSymbol([data.symbol]);
     },
   });
 
-  useEffect(() => {
-    const delayInputTimeout = setTimeout(async () => {
-      if (!searchValue) return;
+  const { setSubscribedSymbol } = useLivePrice({
+    callback: (data: TickerLivePrice) => {
+      const { price, change } = data[suggestion.quote.symbol];
+      onChange({
+        ...suggestion,
+        quote: {
+          ...suggestion.quote,
+          price,
+          percentChange: change,
+        }
+      })
+    },
+  });
 
-      mutate({ searchKey: searchValue });
-    }, 500);
+  const selectedQuote = suggestion?.quote;
 
-    return () => clearTimeout(delayInputTimeout);
-  }, [searchValue, mutate]);
-
-  const inputHandler = (event: string) => {
-    setSearchValue(event);
-  };
-
-  const onSelectOptions = (symbol: string) => {
-    getQuote.mutateAsync({ symbol: symbol });
-  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -129,31 +138,7 @@ const AssetLookup: React.FC<AssetLookupProps> = ({onSelectQuote}) => {
           )}
           {!getQuote.isLoading &&
             (selectedQuote ? (
-              <div className="w-full flex flex-row text-left justify-between">
-                <span className="font-semibold">
-                  <h4 className="inline">{selectedQuote.shortName}</h4>
-                  <p className="inline text-xs ml-2 text-gray-500">
-                    {selectedQuote.symbol}
-                  </p>
-                </span>
-
-                <h1 className="flex">
-                  <span className="text-md">
-                    {selectedQuote.currency} {selectedQuote.currentPrice}
-                  </span>
-
-                  {selectedQuote.change && (
-                    <span
-                      className={cn(
-                        "ml-1 text-xs self-center px-1 rounded text-white",
-                        selectedQuote.change < 0 ? "bg-red-400" : "bg-green-400"
-                      )}
-                    >
-                      {selectedQuote.change.toFixed(2)}%
-                    </span>
-                  )}
-                </h1>
-              </div>
+              <AssetDisplay selectedQuote={selectedQuote} />
             ) : (
               <span className="text-gray-500">Select a quote</span>
             ))}
@@ -167,20 +152,22 @@ const AssetLookup: React.FC<AssetLookupProps> = ({onSelectQuote}) => {
           maxHeight: "var(--radix-popover-content-available-height)",
         }}
       >
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
-            onValueChange={inputHandler}
+            onValueChange={(text) => {
+              debounced(text);
+            }}
             placeholder="Search framework..."
           />
           <CommandGroup>
-            <ScrollArea className="h-full w-full rounded-md ">
+            <ScrollArea className="h-full w-full rounded-md">
               {options.map((option, index) => (
                 <CommandItem
                   key={`${option.shortName}-${option.symbol}-${option.typeDisp}-${index}`}
                   value={option.symbol}
                   className="grid grid-cols-[min-content_1fr_2fr_1fr]"
                   onSelect={(currentValue) => {
-                    onSelectOptions(currentValue);
+                    getQuote.mutateAsync({ symbol: currentValue });
                     setOpen(false);
                   }}
                 >
