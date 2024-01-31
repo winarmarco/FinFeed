@@ -3,9 +3,12 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "@/server";
 import { createTRPCContext } from "@/server/trpc";
 import { NextRequest } from "next/server";
+import { getAuth } from "@clerk/nextjs/server";
 
 export const createContext = async (req: NextRequest) => {
-  return createTRPCContext(req);
+  return createTRPCContext({
+    headers: req.headers,
+  });
 };
 
 const handler = (req: NextRequest) =>
