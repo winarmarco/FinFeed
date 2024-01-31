@@ -2,8 +2,8 @@ import {auth} from "@clerk/nextjs";
 import {redirect} from "next/navigation";
 import TrendingBar from "./components/trendingbar";
 import Sidebar from "@/components/sidebar/sidebar";
+import { api } from "@/_trpc/server";
 
-import { trpc } from "@/_trpc/client";
 
 export default async function DashboardLayout({
   children,
@@ -12,9 +12,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
   params: {storeId: string};
 }) {
-  const {userId} = auth();
 
-  if (!userId) redirect("/sign-in");
 
   return (
     <div className="flex items-center justify-center">

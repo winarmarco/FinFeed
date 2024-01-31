@@ -5,6 +5,9 @@ import * as z from "zod";
 
 const servicesRouter = router({
   services: service,
+  getSomething: publicProcedure.query(({ ctx }) => {
+    return `HELLO UNKNONW`;
+  }),
 });
 
 export const appRouter = mergeRouters(servicesRouter);
