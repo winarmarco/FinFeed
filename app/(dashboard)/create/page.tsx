@@ -5,121 +5,94 @@
 // import StarterKit from "@tiptap/starter-kit";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-// import {Label} from "@radix-ui/react-label";
-// import Toolbar from "./components/rich-text-editor/toolbar/toolbar";
-// import TextEditor from "./components/rich-text-editor/text-editor";
-// import CallCard from "@/components/call-card";
-import CallCardForm from "@/app/(dashboard)/create/components/trade-suggestion-form/trade-suggestion-form";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
+import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import TradeSuggestionForm from "@/app/(dashboard)/create/components/trade-suggestion-form/trade-suggestion-form";
 import TextEditor from "./components/rich-text-editor/text-editor";
 import { quotePriceSchema } from "@/server/model/quote.model";
-import { generateJSON } from "@tiptap/react";
+import { generateHTML, generateJSON } from "@tiptap/react";
 import { editorExtension } from "@/lib/constants";
-import { getSignedURL, uploadFile } from "@/server/service/s3/controller";
 import { trpc } from "@/_trpc/client";
+import { computeSHA256, createFile, createFormData } from "@/server/utils";
+import { uploadImageToS3 } from "@/server/router/service/s3/controller";
+import { createPostSchema } from "@/server/model/post.model";
 
-export const tradeSuggestionFormSchema = z.object({
-  quote: z.object(quotePriceSchema.shape, {
-    required_error: "Quote is required",
-  }),
-  predictionPrice: z.number({
-    required_error: "Prediction price is required",
-  }),
-});
-
-export type ITradeSuggestion = z.infer<typeof tradeSuggestionFormSchema>;
-
-const formSchema = z.object({
-  blog: z.string().min(0, { message: "Not long enough" }),
-  tradeSuggestion: tradeSuggestionFormSchema,
-});
-
-type FormSchema = z.infer<typeof formSchema>;
 
 const CreatePostPage: React.FC<{}> = () => {
-  const form = useForm<FormSchema>({
-    // defaultValues: {
-    //   blog: "",
-    //   tradeSuggestion: {},
-    // },
+  const form = useForm<z.infer<typeof createPostSchema>>({
     defaultValues: {
-      tradeSuggestion: {
-        predictionPrice: 45000,
-        quote: {
-          currency: "USD",
-          longName: "Bitcoin USD",
-          percentChange: 3.0346057,
-          price: 43365.8,
-          shortName: "Bitcoin USD",
-          symbol: "BTC-USD",
-        },
-      },
       blog: "",
+      tradeSuggestion: {},
     },
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createPostSchema),
   });
-
+  const { mutateAsync: fileUploader } =
+    trpc.services.s3.getSignedURL.useMutation();
+  const { mutateAsync: createPost } = trpc.post.createPost.useMutation();
   const { errors } = form.formState;
 
   async function recursUploadImage(obj: Record<string, any>) {
     if (obj["content"] && Array.isArray(obj["content"])) {
       for (let content of obj["content"]) {
-        recursUploadImage(content);
+        await recursUploadImage(content);
       }
     } else {
       if (obj["type"] === "image") {
         console.log(obj);
-        const fileBlobURL = obj.attrs.src;
+        const fileBlobUrl = obj.attrs.src;
+        // 1. Create file from FileBlobURL
+        const file = await createFile({ fileBlobUrl });
 
-        const res = await fetch(fileBlobURL);
-        const blob = await res.blob();
-        const file = new File([blob], "image-test", { type: blob.type });
+        // 2. Get Signed URL
+        const { size, type } = file;
+        const s3URL = await fileUploader({
+          size,
+          type,
+          checksum: await computeSHA256(file),
+        });
 
-        const signedURLData = await getSignedURL();
+        if (!s3URL.success)
+          throw new Error("Can't generate URL to upload image");
 
-        if (!signedURLData.success)  throw new Error("Failed uploading file");
-        
-        const {url} = signedURLData.success;
-        const form = new FormData();
-        form.append("image", file);
-        
-        await uploadFile(form, url);
-        // console.log(url);
+        // 3. Create Form Data and upload
+        const formData = createFormData(file);
+        const { data: uploadedURL } = await uploadImageToS3(
+          formData,
+          s3URL.success.url
+        );
+
+        // 4. Attach the URL to image
+        obj.attrs.src = uploadedURL;
       }
     }
   }
 
-  async function parseBlog(blog: string) {
+  async function parseBlog(blogHTML: string) {
     // 1. convert to json,
-    const blogJSON = generateJSON(blog, editorExtension);
+    const blogJSON = generateJSON(blogHTML, editorExtension);
 
     // 2. for each image, upload to aws
-    console.log(blogJSON);
     await recursUploadImage(blogJSON);
 
     // 3. convert docs to html, and attach to post
+    const newBlogHTML = generateHTML(blogJSON, editorExtension);
 
-    // 4. upload post to mongodb
-
-    // Do something with the form values.
+    return newBlogHTML;
+    
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof createPostSchema>) {
     // ✅ This will be type-safe and validated.
-    await parseBlog(values.blog);
+    values.blog = await parseBlog(values.blog);
+    await createPost(values);
   }
 
   return (

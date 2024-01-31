@@ -8,17 +8,11 @@ export const quoteInfoSchema = z.object({
   exchange: z.string(),
 });
 
-export const quotePriceSchema = quoteInfoSchema
-  .pick({
-    shortName: true,
-    longName: true,
-    symbol: true,
-  })
-  .extend({
-    currency: z.string(),
-    price: z.number(),
-    percentChange: z.number(),
-  });
+export const quotePriceSchema = quoteInfoSchema.extend({
+  currency: z.string(),
+  price: z.number(),
+  percentChange: z.number(),
+});
 
 export type IQuoteInfo = z.infer<typeof quoteInfoSchema>;
 export type IQuotePrice = z.infer<typeof quotePriceSchema>;

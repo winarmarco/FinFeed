@@ -83,7 +83,7 @@ const isAuthed = t.middleware(async (opts) => {
 
   return next({
     ctx: {
-      auth: { userId: "abc" },
+      auth: { userId: auth.userId },
     },
   });
 });

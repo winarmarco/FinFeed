@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
-import { IQuote } from "@/server/service/finance/route";
+import { tradeSuggestionSchema } from "@/server/model/trade-suggestion.model";
+import * as z from "zod";
 
 interface AssetDisplayProps {
-  selectedQuote: IQuote,
+  selectedQuote: z.infer<typeof tradeSuggestionSchema>["quote"],
 }
 
 

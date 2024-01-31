@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useDebounce, useDebouncedCallback } from "use-debounce";
-import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
+import { useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,8 @@ import { trpc } from "@/_trpc/client";
 import { useLivePrice } from "@/lib/context/useLivePrice";
 import { TickerLivePrice } from "@/lib/context/LivePriceContextProvider";
 import AssetDisplay from "./asset-display";
-import { Input } from "@/components/ui/input";
-import { InputWithIcon } from "@/components/ui/input-with-icon";
-import { ITradeSuggestion } from "../../../page";
+import * as z from "zod";
+import { tradeSuggestionSchema } from "@/server/model/trade-suggestion.model";
 
 interface IOption {
   symbol: string;
@@ -34,9 +33,11 @@ interface IOption {
   typeDisp: string;
 }
 
+type TradeSuggestion = z.infer<typeof tradeSuggestionSchema>;
+
 interface AssetLookupProps {
-  suggestion: ITradeSuggestion;
-  onChange: (tradeSuggestion: ITradeSuggestion) => void;
+  suggestion: TradeSuggestion
+  onChange: (tradeSuggestion: TradeSuggestion) => void;
 }
 
 const initState = [

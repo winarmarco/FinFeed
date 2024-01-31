@@ -16,21 +16,42 @@ model User {
   followersIds   String[] @db.ObjectId
   followers      User[]   @relation("UserFollow", fields: [followersIds], references: [id])
   totalFollowers Int      @default(0)
-  
-  postsIds       String[] @db.ObjectId
-  posts          Post[]
 
-  savedPostIds   String[] @db.ObjectId
-  savedPost      Post[]   @relation("SavedPosts", fields: [savedPostIds], references: [id])
-  
-  userId         String
+  postsIds String[] @db.ObjectId
+  posts    Post[]
+
+  savedPostIds String[] @db.ObjectId
+  savedPost    Post[]   @relation("SavedPosts", fields: [savedPostIds], references: [id])
+
+  userId String
 }
 
 model Post {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  authorId   String   @db.ObjectId
-  author     User     @relation(fields: [authorId], references: [id])
-  
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  authorId String @db.ObjectId
+  author   User   @relation(fields: [authorId], references: [id])
+
   savedByIds String[] @db.ObjectId
   savedBy    User[]   @relation("SavedPosts", fields: [savedByIds], references: [id])
+
+  quote Quote?
+  predictionPrice Float
+  blog  String
+
+  createdAt DateTime @default(now())
+}
+
+model Quote {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  postId String @unique @db.ObjectId
+  post   Post   @relation(fields: [postId], references: [id])
+
+  currency  String
+  exchange  String
+  longName  String
+  shortName  String
+  symbol    String
+  typeDisp  String
+  price   Float
 }
