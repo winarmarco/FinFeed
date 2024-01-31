@@ -3,6 +3,8 @@ import {redirect} from "next/navigation";
 import TrendingBar from "./components/trendingbar";
 import Sidebar from "@/components/sidebar/sidebar";
 
+import { trpc } from "@/_trpc/client";
+
 export default async function DashboardLayout({
   children,
   params,

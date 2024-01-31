@@ -10,5 +10,11 @@ export const editorExtension = [
     openOnClick: true,
     autolink: true,
   }),
-  Image,
+  Image.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+      };
+    },
+  }),
 ];

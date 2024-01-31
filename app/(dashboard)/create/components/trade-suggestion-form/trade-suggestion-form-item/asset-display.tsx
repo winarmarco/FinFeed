@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { IQuote } from "@/server/service/finance";
+import { IQuote } from "@/server/service/finance/route";
 
 interface AssetDisplayProps {
   selectedQuote: IQuote,

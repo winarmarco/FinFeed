@@ -23,14 +23,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import CallCard from "@/components/trade-suggestion-card";
-import TradingSuggestion from "@/components/trade-suggestion-card";
 import TradeSuggestionForm from "@/app/(dashboard)/create/components/trade-suggestion-form/trade-suggestion-form";
 import TextEditor from "./components/rich-text-editor/text-editor";
 import { quotePriceSchema } from "@/server/model/quote.model";
 import { generateJSON } from "@tiptap/react";
 import { editorExtension } from "@/lib/constants";
+import { getSignedURL, uploadFile } from "@/server/service/s3/controller";
+import { trpc } from "@/_trpc/client";
 
 export const tradeSuggestionFormSchema = z.object({
   quote: z.object(quotePriceSchema.shape, {
@@ -68,35 +67,48 @@ const CreatePostPage: React.FC<{}> = () => {
           symbol: "BTC-USD",
         },
       },
-      blog: ""
+      blog: "",
     },
     resolver: zodResolver(formSchema),
   });
 
   const { errors } = form.formState;
 
-  function recursUploadImage(obj : Record<string, any>) {
-  
+  async function recursUploadImage(obj: Record<string, any>) {
     if (obj["content"] && Array.isArray(obj["content"])) {
       for (let content of obj["content"]) {
         recursUploadImage(content);
       }
     } else {
       if (obj["type"] === "image") {
-        // uploadImage
+        console.log(obj);
+        const fileBlobURL = obj.attrs.src;
+
+        const res = await fetch(fileBlobURL);
+        const blob = await res.blob();
+        const file = new File([blob], "image-test", { type: blob.type });
+
+        const signedURLData = await getSignedURL();
+
+        if (!signedURLData.success)  throw new Error("Failed uploading file");
+        
+        const {url} = signedURLData.success;
+        const form = new FormData();
+        form.append("image", file);
+        
+        await uploadFile(form, url);
+        // console.log(url);
       }
     }
   }
 
-
-  function parseBlog(blog: string) {
+  async function parseBlog(blog: string) {
     // 1. convert to json,
     const blogJSON = generateJSON(blog, editorExtension);
 
     // 2. for each image, upload to aws
-    recursUploadImage(blogJSON);
-
-
+    console.log(blogJSON);
+    await recursUploadImage(blogJSON);
 
     // 3. convert docs to html, and attach to post
 
@@ -105,10 +117,9 @@ const CreatePostPage: React.FC<{}> = () => {
     // Do something with the form values.
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // ✅ This will be type-safe and validated.
-    parseBlog(values.blog);
-    console.log(values);
+    await parseBlog(values.blog);
   }
 
   return (

@@ -1,5 +1,5 @@
 import { router } from "../trpc";
-import { finance } from "./finance";
+import { finance } from "./finance/route";
 
 const serviceRouter = router({
   finance,

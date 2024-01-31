@@ -10,6 +10,7 @@ import Toolbar from "./toolbar/toolbar";
 import StarterKit from "@tiptap/starter-kit";
 import { ControllerRenderProps } from "react-hook-form";
 import { editorExtension } from "@/lib/constants";
+import { useState } from "react";
 
 interface TextEditorProps {
   onChange: (richText: string) => void;
@@ -17,6 +18,10 @@ interface TextEditorProps {
 
 
 const TextEditor: React.FC<TextEditorProps> = ({ onChange }) => {
+
+  const [file, setFile] = useState<File[] | undefined>([]);
+
+
   const editor = useEditor({
     extensions: editorExtension,
     editorProps: {
