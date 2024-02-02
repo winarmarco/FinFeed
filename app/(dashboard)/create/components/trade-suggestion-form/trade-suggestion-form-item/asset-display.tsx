@@ -1,13 +1,20 @@
+import { trpc } from "@/_trpc/client";
+import { LivePrice, TickerLivePrice } from "@/lib/context/LivePriceContextProvider";
+import { useLivePrice } from "@/lib/context/useLivePrice";
 import { cn } from "@/lib/utils";
 import { tradeSuggestionSchema } from "@/server/model/trade-suggestion.model";
+import { Quote } from "@prisma/client";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import * as z from "zod";
 
 interface AssetDisplayProps {
-  selectedQuote: z.infer<typeof tradeSuggestionSchema>["quote"],
+  selectedQuote: z.infer<typeof tradeSuggestionSchema>["quote"] | (Quote & {percentChange: number}),
 }
 
 
 const AssetDisplay: React.FC<AssetDisplayProps> = ({selectedQuote}) => {
+
   return (
     <div className="w-full flex flex-row text-left justify-between">
       <span className="font-semibold">
@@ -19,7 +26,7 @@ const AssetDisplay: React.FC<AssetDisplayProps> = ({selectedQuote}) => {
 
       <h1 className="flex">
         <span className="text-md">
-          {selectedQuote.currency} {selectedQuote.price}
+          {selectedQuote.currency} <span>{selectedQuote.price.toFixed(5)}</span>
         </span>
 
         {selectedQuote.percentChange && (

@@ -1,3 +1,4 @@
+import AssetDisplay from "@/app/(dashboard)/create/components/trade-suggestion-form/trade-suggestion-form-item/asset-display";
 import {
   Card,
   CardContent,
@@ -6,59 +7,102 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { tradeSuggestionSchema } from "@/server/model/trade-suggestion.model";
+import * as z from "zod";
+import { Button } from "./ui/button";
+import { Quote } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { trpc } from "@/_trpc/client";
+import { LivePrice } from "@/lib/context/LivePriceContextProvider";
+import { useLivePrice } from "@/lib/context/useLivePrice";
+import { Loader2 } from "lucide-react";
 
-interface TradeSuggestionCardProps {
-  symbol: string,
-  initialPrice: number,
+const TradeSuggestionCard: React.FC<z.infer<typeof tradeSuggestionSchema> | {
   predictionPrice: number,
-}
-
-const TradeSuggestionCard: React.FC<TradeSuggestionCardProps> = ({
-  symbol,
-  initialPrice,
+  quote: (Quote)
+}> = ({
   predictionPrice,
+  quote,
 }) => {
 
-  const currentPrice = (initialPrice + predictionPrice) / 3;
+  const [livePrice, setLivePrice] = useState<LivePrice>();
+  const {symbol} = quote;
 
-  const pnlFromInit = parseFloat(String((predictionPrice - initialPrice) / initialPrice * 100)).toFixed(2);
-  const currentPnl = parseFloat(String((currentPrice - initialPrice) / initialPrice * 100)).toFixed(2); 
+  const {mutateAsync: getCurrPrice} = trpc.services.finance.getQuote.useMutation({
+    onSuccess: (data) => setLivePrice({
+      change: data.percentChange,
+      currency: data.currency,
+      symbol: data.symbol,
+      price: data.price,
+    })
+  });
+
+
+  const {subscribedLivePrice, subscribedSymbol, setSubscribedSymbol} = useLivePrice({
+    callback: (data) => {
+      // if the live data has the current symbol, then update the live price
+      if (Object.keys(data).includes(symbol)) setLivePrice(data[quote.symbol]);
+    }
+  })
+
+
+  useEffect(() => {
+    // if symbol price is already subscribed, just get the data
+    if (subscribedSymbol.includes(symbol)) {  
+      setLivePrice(subscribedLivePrice[symbol])
+    } else {
+      
+      // if symbol is not subscribed
+      // fetch the latest one, and subscribe the symbol
+      getCurrPrice({symbol});
+      setSubscribedSymbol((prevSymbol) => Array.from(new Set([...prevSymbol, symbol])));
+    }
+  }, [symbol]);
+
+  const potentialPnL = (livePrice) && (predictionPrice - livePrice.price) / livePrice.price;
 
   return (
-    <Card className="w-full flex flex-col px-4 py-4">
+    <Card className="w-full flex flex-col px-4 py-4 mb-2">
       <CardHeader className="p-0 border-b-2 py-2">
-        <CardTitle>{symbol}</CardTitle>
+        <span className="font-bold">My Prediction</span>
+        <CardTitle>
+          <div className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+            <div className="w-full justify-between">
+              {!livePrice && <Loader2 className="animate-spin"/>}
+              {livePrice && <AssetDisplay selectedQuote={{...quote, price: livePrice.price, percentChange: livePrice.change}} />}
+            </div>
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="flex flex-row border-b-2 py-2">
-          <div className="flex-1">
-            <CardDescription>Prediction Price:</CardDescription>
-            <CardTitle>${predictionPrice}</CardTitle>
-          </div>
-          <div className="max-w-[100px] bg-green-400 px-2 flex items-center rounded text-white">
-            LONG
+        <div className="py-2">
+          <div className="grid grid-cols-2">
+            <div className="flex flex-col">
+              <span className="text-xs font-medium">Target Price</span>
+              <span className="font-semibold">{quote.currency} {predictionPrice}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="text-xs font-medium">Entry Price</span>
+              <span className="font-semibold">{quote.currency} {quote.price.toFixed(5)}</span>
+            </div>
           </div>
         </div>
 
-        <div className="py-2 grid grid-cols-2 gap-2">
-          <div>
-            <CardDescription>Initial Price</CardDescription>
-            <CardTitle>${initialPrice}</CardTitle>
-          </div>
-
-          <div>
-            <CardDescription>Current Price</CardDescription>
-            <CardTitle>${parseFloat(String(currentPrice)).toFixed(2)}</CardTitle>
-          </div>
-
-          <div>
-            <CardDescription>Profit/Loss (from Initial price)</CardDescription>
-            <CardTitle className="text-green-600">+{pnlFromInit}%</CardTitle>
-          </div>
-
-          <div>
-            <CardDescription>Current Profit/Loss</CardDescription>
-            <CardTitle className="text-green-600">+{currentPnl}%</CardTitle>
+        <div className="py-2">
+          <div className="text-xs">
+            <span className="font-medium">Potential Gain/Loss: </span>
+            <span
+              className={cn(
+                "ml-2",
+                potentialPnL && potentialPnL < 0
+                  ? "text-red-600"
+                  : potentialPnL && "text-green-600"
+              )}
+            >
+              {potentialPnL ? (potentialPnL * 100).toFixed(2) + "%" : "-"}
+            </span>
           </div>
         </div>
       </CardContent>

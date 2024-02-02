@@ -8,7 +8,7 @@ const YAHOO_FINANCE_STREAM_URL = "wss://streamer.finance.yahoo.com/";
 const YAHOO_FINANCE_PROTO_URL = "./YPricingData.proto";
 
 
-interface LivePrice {
+export interface LivePrice {
   symbol: string;
   price: number;
   change: number;
@@ -20,7 +20,8 @@ export interface TickerLivePrice {
 }
 
 interface ILivePriceContext {
-  livePrice: TickerLivePrice,
+  subscribedLivePrice: TickerLivePrice,
+  subscribedSymbol: String[],
   setSubscribedSymbol: Dispatch<SetStateAction<String[]>>;
 }
 
@@ -31,11 +32,11 @@ export const LivePriceContextProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const [subscribedSymbol, setSubscribedSymbol] = useState<String[]>([]);
-  const [livePrice, setLivePrice] = useState<TickerLivePrice>({});
+  const [subscribedLivePrice, setSubsribedLivePrice] = useState<TickerLivePrice>({});
 
   useEffect(() => {
     if (!subscribedSymbol) return;
-
+    
     const ws = new WebSocket(YAHOO_FINANCE_STREAM_URL);
 
     protoBuf
@@ -44,7 +45,7 @@ export const LivePriceContextProvider: React.FC<{
         const YaTicker = root.lookupType("yaticker");
 
         ws.onopen = () => {
-          console.log("Websocket connection opend.");
+          console.log("Websocket connection opened.");
           ws.send(JSON.stringify({ subscribe: subscribedSymbol }));
         };
 
@@ -53,7 +54,7 @@ export const LivePriceContextProvider: React.FC<{
         };
     
         ws.onclose = (event) => {
-          console.log("Websocket closed");
+          console.log("Websocket closed", event);
         };
     
         ws.onmessage = (event) => {
@@ -66,8 +67,7 @@ export const LivePriceContextProvider: React.FC<{
             change: data.changePercent,
             currency: data.currency,
           }
-          console.log("INCOMGIN MESSAGE", data);
-          setLivePrice((prevValue) => {
+          setSubsribedLivePrice((prevValue) => {
             return {
               ...prevValue,
               [data.id]: livePriceData,
@@ -81,7 +81,7 @@ export const LivePriceContextProvider: React.FC<{
   }, [subscribedSymbol]);
 
   return (
-    <LivePriceContext.Provider value={{ livePrice, setSubscribedSymbol }}>
+    <LivePriceContext.Provider value={{ subscribedLivePrice, subscribedSymbol, setSubscribedSymbol }}>
       {children}
     </LivePriceContext.Provider>
   );

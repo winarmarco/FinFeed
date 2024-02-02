@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { WebhookEvent } from "@clerk/nextjs/server";
+import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { createUser } from "@/server/action/user.action";
 
 async function handler(req: Request) {
@@ -50,14 +50,15 @@ async function handler(req: Request) {
   }
 
   // Get the ID and type
-  const { id } = evt.data;
+  const userData = evt.data;
   const eventType = evt.type;
 
-  if (eventType === "user.created") {
-    if (!id) throw new Error("User id is missing");
+  console.log(evt);
 
+  if (eventType === "user.created") {
     try {
-      const user = await createUser({ userId: id });
+      const user = await createUser({ user: userData as UserJSON });
+      console.log(user);
       return new Response("success", { status: 200 });
     } catch (error: any) {
       console.error(error);

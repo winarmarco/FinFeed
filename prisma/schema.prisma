@@ -9,21 +9,28 @@ datasource db {
 
 model User {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  followingIds   String[] @db.ObjectId
+  followingIds   String[] @default([]) @db.ObjectId
   following      User[]   @relation("UserFollow", fields: [followingIds], references: [id])
   totalFollowing Int      @default(0)
 
-  followersIds   String[] @db.ObjectId
+  followersIds   String[] @default([]) @db.ObjectId
   followers      User[]   @relation("UserFollow", fields: [followersIds], references: [id])
   totalFollowers Int      @default(0)
 
-  postsIds String[] @db.ObjectId
+  postsIds String[] @default([]) @db.ObjectId
   posts    Post[]
 
-  savedPostIds String[] @db.ObjectId
+  savedPostIds String[] @default([]) @db.ObjectId
   savedPost    Post[]   @relation("SavedPosts", fields: [savedPostIds], references: [id])
 
-  userId String
+  userId        String
+  firstName     String   @default("")
+  lastName      String   @default("")
+  username      String   @default("")
+  imageUrl      String   @default("")
+  hasImage      Boolean  @default(false)
+  emailAddreses String[] @default([])
+  phoneNumbers  String[] @default([])
 }
 
 model Post {
@@ -31,12 +38,15 @@ model Post {
   authorId String @db.ObjectId
   author   User   @relation(fields: [authorId], references: [id])
 
-  savedByIds String[] @db.ObjectId
+  savedByIds String[] @default([]) @db.ObjectId
   savedBy    User[]   @relation("SavedPosts", fields: [savedByIds], references: [id])
 
-  quote Quote?
+  quoteId String @unique @db.ObjectId
+  quote Quote @relation(fields: [quoteId], references: [id])
+
+
   predictionPrice Float
-  blog  String
+  blog            String
 
   createdAt DateTime @default(now())
 }
@@ -44,14 +54,13 @@ model Post {
 model Quote {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  postId String @unique @db.ObjectId
-  post   Post   @relation(fields: [postId], references: [id])
+  post Post?
 
   currency  String
   exchange  String
   longName  String
-  shortName  String
+  shortName String
   symbol    String
   typeDisp  String
-  price   Float
+  price     Float
 }

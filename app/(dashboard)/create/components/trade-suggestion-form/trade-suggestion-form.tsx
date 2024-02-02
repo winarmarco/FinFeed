@@ -9,7 +9,10 @@ import {
 import AssetLookup from "./trade-suggestion-form-item/asset-lookup";
 import { InputWithIcon } from "@/components/ui/input-with-icon";
 import { cn } from "@/lib/utils";
-import { ITradeSuggestion } from "../../page";
+import * as z from "zod";
+import { tradeSuggestionSchema } from "@/server/model/trade-suggestion.model";
+
+type ITradeSuggestion = z.infer<typeof tradeSuggestionSchema>;
 
 const TradeSuggestionForm: React.FC<{
   onChange: (tradeSuggestion: ITradeSuggestion) => void;

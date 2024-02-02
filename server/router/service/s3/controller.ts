@@ -23,6 +23,7 @@ export const uploadImageToS3 = async (form: FormData, url: string) => {
 
   if (!res.ok) throw new Error("Error uploading file");
 
-  const data = res.url;
+  // console.log(data);
+  const data = res.url.split("?")[0];
   return { res, data };
 };

@@ -4,7 +4,6 @@ import { LivePriceContext, TickerLivePrice } from "./LivePriceContextProvider";
 interface IUseLivePrice {
   callback?: (ticker: TickerLivePrice) => void;
 }
-
 export const useLivePrice = ({ callback }: IUseLivePrice) => {
   const context = useContext(LivePriceContext);
   const callbackRef = useRef(callback);
@@ -13,17 +12,17 @@ export const useLivePrice = ({ callback }: IUseLivePrice) => {
     throw new Error("useLivePrice must be used within a 'LivePriceProvider'");
   }
 
-  const { livePrice } = context;
+  const { subscribedLivePrice } = context;
 
   useLayoutEffect(() => {
     callbackRef.current = callback;
   });
 
   useEffect(() => {
-    if (callbackRef.current && Object.keys(livePrice).length > 0) {
-      callbackRef.current(livePrice);
+    if (callbackRef.current && Object.keys(subscribedLivePrice).length > 0) {
+      callbackRef.current(subscribedLivePrice);
     }
-  }, [livePrice]);
+  }, [subscribedLivePrice]);
 
   return context;
 };
