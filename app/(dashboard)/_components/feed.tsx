@@ -21,7 +21,7 @@ interface FeedProps {
 
 export const Feed: React.FC<FeedProps> = ({posts}) => {
 
-  return <main>
+  return <div className="flex flex-col divide-y-2">
     {posts.map((post, index) => <FeedCard key={index} post={post}/>)}
-  </main>
+    </div>
 }

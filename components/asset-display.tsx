@@ -16,7 +16,7 @@ interface AssetDisplayProps {
 const AssetDisplay: React.FC<AssetDisplayProps> = ({selectedQuote}) => {
 
   return (
-    <div className="w-full flex flex-row text-left justify-between">
+    <div className="w-full flex flex-col md:flex-row text-left justify-between">
       <span className="font-semibold">
         <h4 className="inline">{selectedQuote.shortName}</h4>
         <p className="inline text-xs ml-2 text-gray-500">
