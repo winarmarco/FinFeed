@@ -1,4 +1,4 @@
-import AssetDisplay from "@/app/(dashboard)/create/components/trade-suggestion-form/trade-suggestion-form-item/asset-display";
+import AssetDisplay from "@/components/asset-display";
 import {
   Card,
   CardContent,

@@ -23,6 +23,12 @@ model User {
   savedPostIds String[] @default([]) @db.ObjectId
   savedPost    Post[]   @relation("SavedPosts", fields: [savedPostIds], references: [id])
 
+  likedPostIds String[] @default([]) @db.ObjectId
+  likedPost  Post[] @relation("LikedPosts", fields: [likedPostIds], references: [id])
+
+  comment Comment[]
+
+
   userId        String
   firstName     String   @default("")
   lastName      String   @default("")
@@ -41,12 +47,22 @@ model Post {
   savedByIds String[] @default([]) @db.ObjectId
   savedBy    User[]   @relation("SavedPosts", fields: [savedByIds], references: [id])
 
+  totalSaved Int @default(0)
+
   quoteId String @unique @db.ObjectId
   quote Quote @relation(fields: [quoteId], references: [id])
 
-
   predictionPrice Float
   blog            String
+
+  commentIds  String[] @default([]) @db.ObjectId
+  comments Comment[]
+
+  totalLike Int @default(0)
+
+  likedById String[] @db.ObjectId
+  likedBy User[] @relation("LikedPosts", fields: [likedById], references: [id])
+
 
   createdAt DateTime @default(now())
 }
@@ -64,3 +80,14 @@ model Quote {
   typeDisp  String
   price     Float
 }
+
+model Comment {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  message String
+  postId  String @db.ObjectId
+  post Post @relation(fields:[postId], references: [id])
+
+  authorId  String @db.ObjectId
+  author  User  @relation(fields: [authorId], references: [id])
+}
+

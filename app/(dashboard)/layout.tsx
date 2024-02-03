@@ -1,6 +1,6 @@
 import {auth} from "@clerk/nextjs";
 import {redirect} from "next/navigation";
-import TrendingBar from "./components/trendingbar";
+import TrendingBar from "./_components/trendingbar";
 import Sidebar from "@/components/sidebar/sidebar";
 import { api } from "@/_trpc/server";
 

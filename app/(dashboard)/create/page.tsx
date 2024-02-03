@@ -15,8 +15,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import TradeSuggestionForm from "@/app/(dashboard)/create/components/trade-suggestion-form/trade-suggestion-form";
-import TextEditor from "./components/rich-text-editor/text-editor";
+import TradeSuggestionForm from "@/app/(dashboard)/create/_components/trade-suggestion-form/trade-suggestion-form";
+import TextEditor from "./_components/rich-text-editor/text-editor";
 import { quotePriceSchema } from "@/server/model/quote.model";
 import { generateHTML, generateJSON } from "@tiptap/react";
 import { editorExtension } from "@/lib/constants";

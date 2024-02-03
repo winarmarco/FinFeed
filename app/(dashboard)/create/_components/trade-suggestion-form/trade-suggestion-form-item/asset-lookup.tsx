@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/_trpc/client";
 import { useLivePrice } from "@/lib/context/useLivePrice";
 import { TickerLivePrice } from "@/lib/context/LivePriceContextProvider";
-import AssetDisplay from "./asset-display";
+import AssetDisplay from "../../../../../../components/asset-display";
 import * as z from "zod";
 import { tradeSuggestionSchema } from "@/server/model/trade-suggestion.model";
 

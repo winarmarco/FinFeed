@@ -58,7 +58,6 @@ async function handler(req: Request) {
   if (eventType === "user.created") {
     try {
       const user = await createUser({ user: userData as UserJSON });
-      console.log(user);
       return new Response("success", { status: 200 });
     } catch (error: any) {
       console.error(error);
