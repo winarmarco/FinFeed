@@ -24,7 +24,7 @@ import { trpc } from "@/_trpc/client";
 import { computeSHA256, createFile, createFormData } from "@/server/utils";
 import { uploadImageToS3 } from "@/server/router/service/s3/controller";
 import { createPostSchema } from "@/server/model/post.model";
-
+import { recursUploadImage } from "@/lib/upload-image-tiptap";
 
 const CreatePostPage: React.FC<{}> = () => {
   const form = useForm<z.infer<typeof createPostSchema>>({
@@ -39,54 +39,17 @@ const CreatePostPage: React.FC<{}> = () => {
   const { mutateAsync: createPost } = trpc.post.createPost.useMutation();
   const { errors } = form.formState;
 
-  async function recursUploadImage(obj: Record<string, any>) {
-    if (obj["content"] && Array.isArray(obj["content"])) {
-      for (let content of obj["content"]) {
-        await recursUploadImage(content);
-      }
-    } else {
-      if (obj["type"] === "image") {
-        console.log(obj);
-        const fileBlobUrl = obj.attrs.src;
-        // 1. Create file from FileBlobURL
-        const file = await createFile({ fileBlobUrl });
-
-        // 2. Get Signed URL
-        const { size, type } = file;
-        const s3URL = await fileUploader({
-          size,
-          type,
-          checksum: await computeSHA256(file),
-        });
-
-        if (!s3URL.success)
-          throw new Error("Can't generate URL to upload image");
-
-        // 3. Create Form Data and upload
-        const formData = createFormData(file);
-        const { data: uploadedURL } = await uploadImageToS3(
-          formData,
-          s3URL.success.url
-        );
-
-        // 4. Attach the URL to image
-        obj.attrs.src = uploadedURL;
-      }
-    }
-  }
-
   async function parseBlog(blogHTML: string) {
     // 1. convert to json,
     const blogJSON = generateJSON(blogHTML, editorExtension);
 
     // 2. for each image, upload to aws
-    await recursUploadImage(blogJSON);
+    await recursUploadImage(blogJSON, fileUploader);
 
     // 3. convert docs to html, and attach to post
     const newBlogHTML = generateHTML(blogJSON, editorExtension);
 
     return newBlogHTML;
-    
   }
 
   async function onSubmit(values: z.infer<typeof createPostSchema>) {

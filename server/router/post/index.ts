@@ -1,6 +1,6 @@
 import { createPostSchema } from "@/server/model/post.model";
 import { quotePriceSchema } from "@/server/model/quote.model";
-import { protectedProcedure, router } from "@/server/trpc";
+import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 import { clerkClient } from "@clerk/nextjs";
 import { users } from "@clerk/nextjs/api";
 import {
@@ -81,6 +81,34 @@ export const getLatestPost = protectedProcedure
     });
 
     return posts;
+  });
+
+export const getPost = publicProcedure
+  .input(
+    z.object({
+      postId: z.string(),
+    })
+  )
+  .query(async ({ input, ctx }) => {
+    const { postId } = input;
+
+    const result = await ctx.prisma.post.findUniqueOrThrow({
+      where: {
+        id: postId,
+      },
+      include: {
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+            imageUrl: true,
+          },
+        },
+        quote: true,
+      },
+    });
+
+    return result;
   });
 
 export const toggleLikePost = protectedProcedure
@@ -203,6 +231,7 @@ export const postRouter = router({
   post: router({
     createPost,
     getLatestPost,
+    getPost,
     toggleLikePost,
     toggleSavePost,
   }),

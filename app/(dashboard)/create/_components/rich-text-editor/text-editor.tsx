@@ -6,7 +6,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import List from "@tiptap/extension-list-item";
 import Heading from "@tiptap/extension-heading";
-import Toolbar from "./toolbar/toolbar";
+import Toolbar from "../../../../../components/toolbar/toolbar";
 import StarterKit from "@tiptap/starter-kit";
 import { ControllerRenderProps } from "react-hook-form";
 import { editorExtension } from "@/lib/constants";
@@ -18,9 +18,6 @@ interface TextEditorProps {
 
 
 const TextEditor: React.FC<TextEditorProps> = ({ onChange }) => {
-
-  const [file, setFile] = useState<File[] | undefined>([]);
-
 
   const editor = useEditor({
     extensions: editorExtension,

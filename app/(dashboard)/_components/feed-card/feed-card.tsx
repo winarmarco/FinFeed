@@ -8,12 +8,16 @@ import Image from "next/image";
 import TradeSuggestionCard from "../../../../components/trade-suggestion-card";
 import { trpc } from "@/_trpc/client";
 import React from "react";
+
 import { FeedCardButton } from "./feed-card-buttons";
 import { RouterOutput } from "@/server";
 import { AuthorProfile } from "./author-profile";
+import { useRouter } from "next/navigation";
+
 
 interface FeedCardProps {
   post: RouterOutput["post"]["getLatestPost"][0];
+  
 }
 
 const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
@@ -64,11 +68,11 @@ const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
   return (
     <div className="flex flex-col gap-y-4 py-10 px-6">
       <AuthorProfile author={post.author} />
-      <EditorContent editor={editor} />
       <TradeSuggestionCard
         predictionPrice={post.predictionPrice}
         quote={post.quote}
       />
+      <EditorContent editor={editor} />
 
       <div className="flex flex-row w-[70%] justify-between gap-x-2 text-gray-400">
         <FeedCardButton
