@@ -49,15 +49,25 @@ const TradeSuggestionCard: React.FC<
     });
 
   useEffect(() => {
-    // if symbol price is already subscribed, just get the data
+    // if symbol price is already subscribed, just get the data if exist
     if (subscribedSymbol.includes(symbol)) {
-      setLivePrice(subscribedLivePrice[symbol]);
+
+      // if the live data is exist, then get it, otherwise, fetch the latest one
+      if (Object.keys(subscribedLivePrice).includes(symbol)) {
+        setLivePrice(subscribedLivePrice[symbol]); 
+      } else {
+        getCurrPrice({ symbol }); // Fetch latest price
+      }
+
+
     } else {
       // if symbol is not subscribed
       // fetch the latest one, and subscribe the symbol
       getCurrPrice({ symbol });
-      setSubscribedSymbol((prevSymbol) =>
-        Array.from(new Set([...prevSymbol, symbol]))
+      setSubscribedSymbol((prevSymbol) => {
+        console.log((prevSymbol.includes(symbol)) ? [...prevSymbol] : [...prevSymbol, symbol]);
+        return (prevSymbol.includes(symbol)) ? [...prevSymbol] : [...prevSymbol, symbol]
+      }
       );
     }
   }, [symbol]);

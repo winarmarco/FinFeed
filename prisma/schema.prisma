@@ -58,6 +58,8 @@ model Post {
   commentIds  String[] @default([]) @db.ObjectId
   comments Comment[]
 
+  totalComment Int @default(0)
+
   totalLike Int @default(0)
 
   likedById String[] @db.ObjectId
@@ -89,5 +91,6 @@ model Comment {
 
   authorId  String @db.ObjectId
   author  User  @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
 }
 

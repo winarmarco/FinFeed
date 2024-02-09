@@ -67,6 +67,8 @@ export const LivePriceContextProvider: React.FC<{
             change: data.changePercent,
             currency: data.currency,
           }
+
+          console.log("MESSAGE", data);
           setSubsribedLivePrice((prevValue) => {
             return {
               ...prevValue,

@@ -21,6 +21,7 @@ interface FeedCardProps {
 }
 
 const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
+  const router = useRouter();
   const editor = useEditor({
     editable: false,
     extensions: editorExtension,
@@ -33,12 +34,14 @@ const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
   const { mutate: toggleLike } = trpc.post.toggleLikePost.useMutation({
     onSuccess: async (data) => {
       await trpcUtils.post.getLatestPost.invalidate();
+      await trpcUtils.post.getPost.invalidate();
     },
   });
 
   const {mutate: toggleSave} = trpc.post.toggleSavePost.useMutation({
     onSuccess: async (data) => {
       await trpcUtils.post.getLatestPost.invalidate();
+      await trpcUtils.post.getPost.invalidate();
     },
   })
 
@@ -55,7 +58,9 @@ const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
   );
   
   // Handlers
-  const handleCommment = (postId: string) => {};
+  const handleCommment = (postId: string) => {
+    router.push(`/post/${post.id}`);
+  };
 
   const handleToggleLike = (postId: string) => {
     toggleLike({ postId });
@@ -78,7 +83,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
         <FeedCardButton
           onClick={() => handleCommment(post.id)}
           icon={<MessageCircleIcon />}
-          count={post.commentIds.length}
+          count={post.totalComment}
         />
         <FeedCardButton
           onClick={() => handleToggleLike(post.id)}

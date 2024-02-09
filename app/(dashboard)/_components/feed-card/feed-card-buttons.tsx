@@ -12,7 +12,7 @@ export const FeedCardButton: React.FC<FeedCardButtonProps> = ({
   onClick,
 }) => {
   return (
-    <button className="flex flex-row gap-x-0.5" onClick={() => {onClick()}}>
+    <button className="flex flex-row gap-x-0.5" onClick={(e) => {e.stopPropagation();onClick()}}>
       {icon}
       <span>{count}</span>
     </button>

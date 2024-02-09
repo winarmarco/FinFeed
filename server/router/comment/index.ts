@@ -29,6 +29,16 @@ const createComment = protectedProcedure
       },
     });
 
+    await ctx.prisma.post.update({
+      where: { id: post.id },
+      data: {
+        commentIds: [...post.commentIds, comment.id],
+        totalComment: {
+          increment: 1,
+        },
+      },
+    });
+
     return comment;
   });
 
