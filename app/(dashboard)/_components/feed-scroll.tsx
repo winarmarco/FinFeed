@@ -14,6 +14,7 @@ export const FeedScroll: React.FC<{}> = () => {
       {posts &&
         posts.map((post, index) => (
           <div
+            key={post.id}
             className="hover:bg-gray-50 transition-colors cursor-pointer"
             onClick={() => router.push(`/post/${post.id}`)}
           >
