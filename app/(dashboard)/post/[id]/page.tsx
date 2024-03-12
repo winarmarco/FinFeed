@@ -30,7 +30,7 @@ const PostDetailsPage = () => {
           </h1>
           <div className="py-2 flex flex-col divide-y-2">
             {getComments.data.map((comment) => (
-              <CommentView comment={comment} />
+              <CommentView key={comment.author.id + comment.message} comment={comment} />
             ))}
           </div>
         </div>

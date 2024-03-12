@@ -1,6 +1,7 @@
 import { protectedProcedure, router } from "@/server/trpc";
+import * as z from "zod";
 
-const getUser = protectedProcedure.query(async ({ ctx }) => {
+const getUser = protectedProcedure.query(async ({ input, ctx }) => {
   const { userId } = ctx.auth;
 
   const user = await ctx.prisma.user.findFirstOrThrow({ where: { userId } });

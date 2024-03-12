@@ -3,6 +3,7 @@
 import { Dispatch, SetStateAction, createContext, useEffect, useState } from "react";
 import protoBuf from "protobufjs";
 import { Buffer as BufferJS } from "buffer";
+import path from "path";
 
 const YAHOO_FINANCE_STREAM_URL = "wss://streamer.finance.yahoo.com/";
 const YAHOO_FINANCE_PROTO_URL = "./YPricingData.proto";
@@ -34,13 +35,14 @@ export const LivePriceContextProvider: React.FC<{
   const [subscribedSymbol, setSubscribedSymbol] = useState<String[]>([]);
   const [subscribedLivePrice, setSubsribedLivePrice] = useState<TickerLivePrice>({});
 
+
   useEffect(() => {
     if (!subscribedSymbol) return;
     
     const ws = new WebSocket(YAHOO_FINANCE_STREAM_URL);
 
     protoBuf
-      .load(YAHOO_FINANCE_PROTO_URL)
+      .load(path.join(__dirname, YAHOO_FINANCE_PROTO_URL))
       .then((root) => {
         const YaTicker = root.lookupType("yaticker");
 
@@ -68,7 +70,6 @@ export const LivePriceContextProvider: React.FC<{
             currency: data.currency,
           }
 
-          console.log("MESSAGE", data);
           setSubsribedLivePrice((prevValue) => {
             return {
               ...prevValue,

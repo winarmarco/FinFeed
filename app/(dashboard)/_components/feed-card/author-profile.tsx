@@ -1,5 +1,6 @@
 import { RouterOutput } from "@/server";
 import { User } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 import React from "react";
 
@@ -25,10 +26,10 @@ export const AuthorProfile: React.FC<AuthorProfileProps> = ({ author }) => {
           {!author.imageUrl && <User />}
         
       </div>
-      <div className="flex flex-col">
-        <p>{authorName}</p>
+      <Link href={`/profile/abcd`} className="flex flex-col" passHref>
+        <a onClick={(e) => {e.stopPropagation();}} className="hover:underline hover:underline-offset-2">{authorName}</a>
         <p className="text-gray-500 text-sm">15/01/2023 23.21</p>
-      </div>
+      </Link>
     </div>
   );
 };

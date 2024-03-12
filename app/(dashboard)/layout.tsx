@@ -18,7 +18,6 @@ export default async function DashboardLayout({
         <main className="py-10 flex-1 divide-y-2 ">
           {children}
         </main>
-
         <TrendingBar />
       </div>
     </div>

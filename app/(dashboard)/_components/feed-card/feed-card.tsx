@@ -49,26 +49,16 @@ const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
   if (!user) return null;
   
   // Constants
-  const likedByMe = post.likedById.some((userLikedId) => {
-    return userLikedId === user.id;
-  });
+  const likedByMe = post.likedById.some((userLikedId) => { return userLikedId === user.id; });
 
-  const bookmarkByMe = post.savedByIds.some(
-    (userSavedId) => userSavedId === user.id
-  );
+  const bookmarkByMe = post.savedByIds.some( (userSavedId) => userSavedId === user.id );
   
   // Handlers
-  const handleCommment = (postId: string) => {
-    router.push(`/post/${post.id}`);
-  };
+  const handleCommment = (postId: string) => { router.push(`/post/${post.id}`); };
 
-  const handleToggleLike = (postId: string) => {
-    toggleLike({ postId });
-  };
+  const handleToggleLike = (postId: string) => { toggleLike({ postId }); };
 
-  const handleToggleSave = (postId: string) => {
-    toggleSave({postId})
-  }
+  const handleToggleSave = (postId: string) => { toggleSave({postId}) }
 
   return (
     <div className="flex flex-col gap-y-4 py-10 px-6">

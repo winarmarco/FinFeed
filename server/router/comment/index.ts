@@ -56,6 +56,7 @@ export const getComments = protectedProcedure
       select: {
         author: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             imageUrl: true,
