@@ -5,7 +5,7 @@ import Image from "next/image";
 import React from "react";
 
 interface AuthorProfileProps {
-  author: RouterOutput["post"]["getLatestPost"][0]["author"];
+  author: RouterOutput["post"]["getPost"]["author"];
 }
 
 export const AuthorProfile: React.FC<AuthorProfileProps> = ({ author }) => {
@@ -26,7 +26,7 @@ export const AuthorProfile: React.FC<AuthorProfileProps> = ({ author }) => {
           {!author.imageUrl && <User />}
         
       </div>
-      <Link href={`/profile/abcd`} className="flex flex-col" passHref>
+      <Link href={`/profile/${author.id}`} className="flex flex-col" passHref>
         <a onClick={(e) => {e.stopPropagation();}} className="hover:underline hover:underline-offset-2">{authorName}</a>
         <p className="text-gray-500 text-sm">15/01/2023 23.21</p>
       </Link>

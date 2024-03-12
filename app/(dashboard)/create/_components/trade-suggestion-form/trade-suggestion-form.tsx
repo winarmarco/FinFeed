@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AssetLookup from "./trade-suggestion-form-item/asset-lookup";
 import { InputWithIcon } from "@/components/ui/input-with-icon";
 import { cn } from "@/lib/utils";
@@ -18,16 +13,13 @@ const TradeSuggestionForm: React.FC<{
   onChange: (tradeSuggestion: ITradeSuggestion) => void;
   value: ITradeSuggestion;
 }> = ({ onChange, value }) => {
-
   const calculatePotentialPnL = (suggestion?: ITradeSuggestion) => {
     if (!suggestion || !suggestion.quote) return null;
 
-    const {predictionPrice} = suggestion;
-    const {price: currentPrice} = suggestion.quote;
-
+    const { predictionPrice } = suggestion;
+    const { price: currentPrice } = suggestion.quote;
 
     return (predictionPrice - currentPrice) / currentPrice;
-    
   };
 
   const potentialPnL = calculatePotentialPnL(value);
@@ -53,7 +45,7 @@ const TradeSuggestionForm: React.FC<{
                 const inputValue = e.target.value;
                 onChange({
                   ...value,
-                  predictionPrice:  parseFloat(inputValue || "0")
+                  predictionPrice: parseFloat(inputValue || "0"),
                 });
               }}
               icon={value.quote?.currency || ""}

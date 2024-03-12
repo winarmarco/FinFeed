@@ -53,7 +53,6 @@ const CreatePostPage: React.FC<{}> = () => {
   }
 
   async function onSubmit(values: z.infer<typeof createPostSchema>) {
-    // ✅ This will be type-safe and validated.
     values.blog = await parseBlog(values.blog);
     await createPost(values);
   }

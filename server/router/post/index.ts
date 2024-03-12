@@ -57,7 +57,9 @@ export const createPost = protectedProcedure
     return newPost;
   });
 
-export const getLatestPost = protectedProcedure
+// GET LATEST POST
+// gets all the latest post to be displayed in the main page
+export const getLatestPosts = protectedProcedure
   .input(
     z.object({
       page: z.number().default(1),
@@ -71,6 +73,7 @@ export const getLatestPost = protectedProcedure
       include: {
         author: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             imageUrl: true,
@@ -83,6 +86,8 @@ export const getLatestPost = protectedProcedure
     return posts;
   });
 
+// GET POST
+// gets post details by postId
 export const getPost = publicProcedure
   .input(
     z.object({
@@ -99,6 +104,7 @@ export const getPost = publicProcedure
       include: {
         author: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             imageUrl: true,
@@ -109,6 +115,39 @@ export const getPost = publicProcedure
     });
 
     return result;
+  });
+
+// GET USER POST
+// gets posts that are created by userId
+export const getUserPost = protectedProcedure
+  .input(
+    z.object({
+      id: z.string(),
+    })
+  )
+  .query(async ({ input, ctx }) => {
+    const { id } = input;
+
+    const user = await ctx.prisma.user.findFirstOrThrow({ where: { id } });
+
+    const userPosts = await ctx.prisma.post.findMany({
+      where: {
+        authorId: user.id,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            imageUrl: true,
+          },
+        },
+        quote: true,
+      },
+    });
+
+    return userPosts;
   });
 
 export const toggleLikePost = protectedProcedure
@@ -169,6 +208,8 @@ export const toggleLikePost = protectedProcedure
     return updatedPost;
   });
 
+// TOGGLE SAVE POST
+// Save and unsave post
 export const toggleSavePost = protectedProcedure
   .input(
     z.object({
@@ -230,8 +271,9 @@ export const toggleSavePost = protectedProcedure
 export const postRouter = router({
   post: router({
     createPost,
-    getLatestPost,
+    getLatestPosts,
     getPost,
+    getUserPost,
     toggleLikePost,
     toggleSavePost,
   }),

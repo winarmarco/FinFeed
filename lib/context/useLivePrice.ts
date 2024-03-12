@@ -12,7 +12,7 @@ export const useLivePrice = ({ callback }: IUseLivePrice) => {
     throw new Error("useLivePrice must be used within a 'LivePriceProvider'");
   }
 
-  const { subscribedLivePrice } = context;
+  const { subscribedLivePrice, setSubscribedSymbol } = context;
 
   useLayoutEffect(() => {
     callbackRef.current = callback;

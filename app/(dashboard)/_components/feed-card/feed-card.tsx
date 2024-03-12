@@ -13,10 +13,12 @@ import { FeedCardButton } from "./feed-card-buttons";
 import { RouterOutput } from "@/server";
 import { AuthorProfile } from "./author-profile";
 import { useRouter } from "next/navigation";
+import { currentUser, useAuth } from "@clerk/nextjs";
+
 
 
 interface FeedCardProps {
-  post: RouterOutput["post"]["getLatestPost"][0];
+  post: RouterOutput["post"]["getPost"];
   
 }
 
@@ -28,19 +30,21 @@ const FeedCard: React.FC<FeedCardProps> = ({ post }) => {
     content: post.blog,
   });
 
+
   // TRPC's
   const trpcUtils = trpc.useUtils();
-  const { data: user } = trpc.user.getUser.useQuery();
+
+  const { data: user } = trpc.user.getCurrentUser.useQuery();
   const { mutate: toggleLike } = trpc.post.toggleLikePost.useMutation({
     onSuccess: async (data) => {
-      await trpcUtils.post.getLatestPost.invalidate();
+      await trpcUtils.post.getLatestPosts.invalidate();
       await trpcUtils.post.getPost.invalidate();
     },
   });
 
   const {mutate: toggleSave} = trpc.post.toggleSavePost.useMutation({
     onSuccess: async (data) => {
-      await trpcUtils.post.getLatestPost.invalidate();
+      await trpcUtils.post.getLatestPosts.invalidate();
       await trpcUtils.post.getPost.invalidate();
     },
   })

@@ -1,16 +1,18 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export interface SidebarItemProps {
   icon: React.ReactNode;
   label: string;
   link: string;
+  type?: "primary" | "secondary",
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({icon, label, link}) => {
+const SidebarItem: React.FC<SidebarItemProps> = ({icon, label, link, type}) => {
   return (
     <Link
       href={link}
-      className="flex flex-row gap-x-2 py-4 my-2 items-center justify-center md:justify-start px-0 md:px-2 group relative hover:bg-slate-100 aspect-square md:aspect-auto transition-bg rounded md:w-full" 
+      className={cn((type === "secondary") ? "bg-green-500 text-white hover:bg-gray-800" : "hover:bg-slate-100","flex flex-row gap-x-2 py-2 my-2 items-center justify-center md:justify-start px-0 md:px-2 group relative  aspect-square md:aspect-auto rounded-lg md:w-full transition-colors" )}
     >
       <div className="w-8 h-8 flex items-center justify-center">{icon}</div>
       <p className="hidden md:block">{label}</p>

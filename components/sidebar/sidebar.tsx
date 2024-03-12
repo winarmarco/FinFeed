@@ -2,7 +2,7 @@ import { UserButton, UserProfile } from "@clerk/nextjs";
 import Logo from "../logo";
 import { User } from "@clerk/nextjs/server";
 import SidebarItem, { SidebarItemProps } from "./sidebar-item";
-import { Bell, Bookmark, Home, Save } from "lucide-react";
+import { Bell, Bookmark, Home, Plus, Save } from "lucide-react";
 import { api } from "@/_trpc/server";
 
 const sidebarItems: SidebarItemProps[] = [
@@ -21,11 +21,17 @@ const sidebarItems: SidebarItemProps[] = [
     link: "/notification",
     icon: <Bell />,
   },
+  {
+    label: "Create Post",
+    link: "/create",
+    icon: <Plus />,
+    type: "secondary",
+  },
 
 ];
 
 const Sidebar = async () => {
-  const user = await api.user.getUser.query();
+  const user = await api.user.getCurrentUser.query();
 
   return (
     <nav className="min-h-screen divide-y w-20 md:w-[300px]">

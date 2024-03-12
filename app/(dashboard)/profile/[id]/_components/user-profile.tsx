@@ -1,5 +1,6 @@
 "use client";
 
+import { trpc } from "@/_trpc/client";
 import { Button } from "@/components/ui/button";
 import { auth, currentUser } from "@clerk/nextjs";
 
@@ -8,27 +9,45 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 const UserProfile: React.FC<{
-  id: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  totalFollowers: number;
-  totalFollowing: number;
-  imageUrl: string;
+  currentUser: {
+    id: string;
+  };
 }> = ({
-  id,
-  username,
-  totalFollowing,
-  totalFollowers,
-  imageUrl,
-  firstName,
-  lastName,
+  currentUser
 }) => {
   const pathName = usePathname();
   const userId = pathName.split("/")[2];
-  const isMe = id === userId;
+  const trpcUtils = trpc.useUtils();
+  const {mutate: toggleFollowUser} = trpc.user.toggleFollowUser.useMutation({
+    onSuccess: (data) => {
+      trpcUtils.user.getUser.invalidate({id: userId});
+    }
+  });
+  const {data: user} = trpc.user.getUser.useQuery({id: userId});
 
+  if (!user) return null;
+  const isMe = currentUser.id === userId;
+
+  const {
+    id,
+    username,
+    firstName,
+    lastName,
+    followersIds,
+    totalFollowers,
+    totalFollowing,
+    imageUrl,
+  } = user;
+
+
+  const isFollowing = followersIds.indexOf(currentUser.id) != -1;
   const displayName = `${firstName} ${lastName}`;
+
+  const toggleFollowing = async () => {
+    const res = await toggleFollowUser({
+      targetId: userId
+    });
+  }
 
   return (
     <div className="relative pb-10">
@@ -55,8 +74,13 @@ const UserProfile: React.FC<{
                 <Button variant={"outline"} className="rounded-full">
                   <BellPlus />
                 </Button>
-                <Button className="flex flex-row gap-x-1">
-                  Following <Check className="w-4 h-4" />
+                <Button onClick={toggleFollowing} className="flex flex-row gap-x-1">
+                  {isFollowing ? <>
+                    Following <Check className="w-4 h-4" />
+                  </> : 
+                  <>
+                    Follow
+                  </>}
                 </Button>
               </>
             )}

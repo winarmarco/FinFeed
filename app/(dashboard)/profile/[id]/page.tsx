@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { api } from "@/_trpc/server";
 import UserProfile from "./_components/user-profile";
+import UserPost from "./_components/user-post";
 
 const Header = () => {
   return (
@@ -20,23 +21,15 @@ const Header = () => {
   );
 };
 
-const UserPost = () => {
-  return (
-    <div>
-      <FeedScroll />
-    </div>
-  );
-};
 
 const ProfilePage = async () => {
-  const user = await api.user.getUser.query();
+  const user = await api.user.getCurrentUser.query();
   
-
   return (
     <div className="flex flex-col">
       <Header />
       <div className="flex flex-col divide-y-2">
-        <UserProfile {...user}/>
+        <UserProfile currentUser={{...user}}/>
 
         <UserPost />
       </div>

@@ -13,7 +13,7 @@ interface CreateUserProps {
 const generateUsername = ({
   firstName,
   lastName,
-  bytes = 32,
+  bytes = 8,
 }: {
   firstName: string;
   lastName: string;
